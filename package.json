@@ -1,0 +1,17 @@
+{
+  "name": "gitops-app",
+  "version": "1.0.0",
+  "description": "Aplicación de ejemplo para el laboratorio GitOps (Build Pipeline + Argo CD)",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
