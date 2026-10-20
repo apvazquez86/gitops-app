@@ -30,6 +30,7 @@ test('GET / muestra los valores del Secret y la version', async () => {
   assert.match(body, /Color: azul/);
   assert.match(body, /Forma: redonda/);
   assert.match(body, /Version: sha-test/);
+  assert.match(body, /Build Pipeline: GitHub Actions/);
 });
 
 test('GET /api/info devuelve la configuracion en JSON', async () => {

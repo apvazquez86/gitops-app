@@ -44,6 +44,7 @@ function createApp(env = process.env) {
   </head>
   <body>
     <h1>Aplicacion actualizada por GitOps</h1>
+    <p>Build Pipeline: GitHub Actions &rarr; GHCR &rarr; PR en gitops &rarr; Argo CD</p>
     <p>Color: ${escapeHtml(settings.color)}</p>
     <p>Forma: ${escapeHtml(settings.forma)}</p>
     <hr>
