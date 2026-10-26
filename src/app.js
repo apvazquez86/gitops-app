@@ -31,7 +31,7 @@ function cssBorderRadius(forma) {
 }
 
 // Settings come from the environment: color/forma from the nginx-settings
-// Secret (envFrom) and APP_VERSION baked into the image by the CI build.
+// ConfigMap (envFrom) and APP_VERSION baked into the image by the CI build.
 function readSettings(env) {
   return {
     color: env.color || 'sin definir',

@@ -59,13 +59,15 @@ jobs:
           cache-to: type=gha,mode=max
 
   promote:
-    # Opens a PR in the deploy repo with the new tag; merging it is the
-    # manual approval step before Argo CD deploys.
+    # Opens a PR in the deploy repo with the new tag for dev; merging it is
+    # the manual approval step before Argo CD deploys. Prod is promoted
+    # separately from the deploy repo.
     needs: build
     runs-on: ubuntu-latest
     env:
       GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
       TAG: ${{ needs.build.outputs.tag }}
+      VALUES_FILE: chart/values-dev.yaml
     steps:
       - name: Check token
         if: env.GITOPS_TOKEN == ''
@@ -80,20 +82,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITOPS_TOKEN }}
         run: |
-          branch="release/gitops-app-${TAG}"
-          sed -i -E "s#(image: ${IMAGE}:).*#\1${TAG}#" manifests/deployment.yaml
+          branch="release/dev/gitops-app-${TAG}"
+          # yq ships with the GitHub-hosted Ubuntu runners and keeps comments.
+          yq -i '.image.tag = strenv(TAG)' "$VALUES_FILE"
           if git diff --quiet; then
-            echo "manifests/deployment.yaml ya apunta a ${TAG}"
+            echo "${VALUES_FILE} ya apunta a ${TAG}"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git commit -am "Deploy gitops-app ${TAG}"
+          git commit -am "Deploy gitops-app ${TAG} to dev"
           git push origin "$branch"
           gh pr create --repo "$GITOPS_REPO" --base main --head "$branch" \
-            --title "Deploy gitops-app ${TAG}" \
-            --body "Actualiza la imagen a \`${IMAGE}:${TAG}\`.
+            --title "Deploy gitops-app ${TAG} to dev" \
+            --body "Actualiza \`image.tag\` en \`${VALUES_FILE}\` a \`${TAG}\` (\`${IMAGE}:${TAG}\`).
 
           Commit de origen: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          Al mergear este PR, Argo CD despliega la nueva version."
+          Al mergear este PR, Argo CD despliega la nueva version en dev. Prod se promueve aparte."

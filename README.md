@@ -10,7 +10,7 @@ Aplicación de ejemplo (Node.js + Express) del laboratorio GitOps. Este repo es 
 | `/api/info` | Lo mismo en JSON |
 | `/healthz` | Health check para las probes de Kubernetes |
 
-Variables de entorno: `color` y `forma` (vienen del Secret `nginx-settings`), `APP_VERSION` (la fija el build) y `PORT` (por defecto 8080).
+Variables de entorno: `color` y `forma` (vienen del ConfigMap `nginx-settings`, definido en `settings` de los values del chart), `APP_VERSION` (la fija el build) y `PORT` (por defecto 8080).
 
 ## Desarrollo local
 
@@ -24,6 +24,6 @@ color=azul forma=redonda npm start   # http://localhost:8080
 
 1. **test**: `npm ci` + `npm test` en cada push y PR.
 2. **build**: solo en `main`. Construye la imagen multi-arquitectura (`linux/amd64`, `linux/arm64`) y la publica en `ghcr.io/apvazquez86/gitops-app:sha-<commit>`.
-3. **promote**: abre un PR en `apvazquez86/gitops` que actualiza el tag en `manifests/deployment.yaml`. Al mergearlo, Argo CD despliega.
+3. **promote**: abre un PR en `apvazquez86/gitops` que actualiza `image.tag` en `chart/values-dev.yaml`. Al mergearlo, Argo CD despliega en dev. Prod se promueve aparte, desde el repo `gitops`.
 
 El paso **promote** necesita el secret `GITOPS_TOKEN`: un fine-grained token con permisos *Contents* y *Pull requests* (lectura y escritura) solo sobre el repo `gitops`.
