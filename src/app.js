@@ -10,6 +10,21 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+// Spanish color names from the Secret mapped to CSS colors for the swatch.
+const CSS_COLORS = {
+  rojo: 'red',
+  azul: 'blue',
+  verde: 'green',
+  amarillo: 'gold',
+  naranja: 'orange',
+  negro: 'black',
+  blanco: 'white',
+};
+
+function cssColor(color) {
+  return CSS_COLORS[String(color).toLowerCase()] || 'gray';
+}
+
 // Settings come from the environment: color/forma from the nginx-settings
 // Secret (envFrom) and APP_VERSION baked into the image by the CI build.
 function readSettings(env) {
@@ -46,6 +61,7 @@ function createApp(env = process.env) {
     <h1>Aplicacion actualizada por GitOps</h1>
     <p>Build Pipeline: GitHub Actions &rarr; GHCR &rarr; PR en gitops &rarr; Argo CD</p>
     <p>Color: ${escapeHtml(settings.color)}</p>
+    <div class="swatch" style="width:120px;height:120px;border:1px solid #000;background:${cssColor(settings.color)}"></div>
     <p>Forma: ${escapeHtml(settings.forma)}</p>
     <hr>
     <p>Version: ${escapeHtml(settings.version)} &middot; Pod: ${escapeHtml(settings.hostname)}</p>
@@ -57,4 +73,4 @@ function createApp(env = process.env) {
   return app;
 }
 
-module.exports = { createApp, escapeHtml };
+module.exports = { createApp, escapeHtml, cssColor };

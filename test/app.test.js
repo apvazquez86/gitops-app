@@ -1,6 +1,6 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { createApp, escapeHtml } = require('../src/app');
+const { createApp, escapeHtml, cssColor } = require('../src/app');
 
 let server;
 let baseUrl;
@@ -28,6 +28,7 @@ test('GET / muestra los valores del Secret y la version', async () => {
   const body = await res.text();
   assert.equal(res.status, 200);
   assert.match(body, /Color: azul/);
+  assert.match(body, /class="swatch"[^>]*background:blue/);
   assert.match(body, /Forma: redonda/);
   assert.match(body, /Version: sha-test/);
   assert.match(body, /Build Pipeline: GitHub Actions/);
@@ -54,6 +55,12 @@ test('sin variables usa valores por defecto', async () => {
   } finally {
     local.close();
   }
+});
+
+test('cssColor traduce el nombre del color y usa gris si no lo conoce', () => {
+  assert.equal(cssColor('rojo'), 'red');
+  assert.equal(cssColor('Rojo'), 'red');
+  assert.equal(cssColor('sin definir'), 'gray');
 });
 
 test('escapeHtml neutraliza HTML en los valores', () => {
