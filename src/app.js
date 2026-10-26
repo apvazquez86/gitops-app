@@ -25,6 +25,11 @@ function cssColor(color) {
   return CSS_COLORS[String(color).toLowerCase()] || 'gray';
 }
 
+// "redonda" draws the swatch as a circle; any other shape keeps it square.
+function cssBorderRadius(forma) {
+  return String(forma).toLowerCase() === 'redonda' ? '50%' : '0';
+}
+
 // Settings come from the environment: color/forma from the nginx-settings
 // Secret (envFrom) and APP_VERSION baked into the image by the CI build.
 function readSettings(env) {
@@ -61,7 +66,7 @@ function createApp(env = process.env) {
     <h1>Aplicacion actualizada por GitOps</h1>
     <p>Build Pipeline: GitHub Actions &rarr; GHCR &rarr; PR en gitops &rarr; Argo CD</p>
     <p>Color: ${escapeHtml(settings.color)}</p>
-    <div class="swatch" style="width:120px;height:120px;border:1px solid #000;background:${cssColor(settings.color)}"></div>
+    <div class="swatch" style="width:120px;height:120px;border:1px solid #000;background:${cssColor(settings.color)};border-radius:${cssBorderRadius(settings.forma)}"></div>
     <p>Forma: ${escapeHtml(settings.forma)}</p>
     <hr>
     <p>Version: ${escapeHtml(settings.version)} &middot; Pod: ${escapeHtml(settings.hostname)}</p>
@@ -73,4 +78,4 @@ function createApp(env = process.env) {
   return app;
 }
 
-module.exports = { createApp, escapeHtml, cssColor };
+module.exports = { createApp, escapeHtml, cssColor, cssBorderRadius };
