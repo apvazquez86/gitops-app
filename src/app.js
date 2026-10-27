@@ -41,8 +41,17 @@ function readSettings(env) {
   };
 }
 
+// DB_PASSWORD comes from the nginx-secrets Secret (unsealed from a
+// SealedSecret) through secretKeyRef. Lab only: the page shows it in clear to
+// prove each environment receives its own value. It is kept out of
+// readSettings so /api/info never returns it.
+function readDbPassword(env) {
+  return env.DB_PASSWORD || 'no configurada';
+}
+
 function createApp(env = process.env) {
   const settings = readSettings(env);
+  const dbPassword = readDbPassword(env);
   const app = express();
 
   app.disable('x-powered-by');
@@ -68,6 +77,7 @@ function createApp(env = process.env) {
     <p>Color: ${escapeHtml(settings.color)}</p>
     <div class="swatch" style="width:120px;height:120px;border:1px solid #000;background:${cssColor(settings.color)};border-radius:${cssBorderRadius(settings.forma)}"></div>
     <p>Forma: ${escapeHtml(settings.forma)}</p>
+    <p>DB_PASSWORD (Sealed Secret, visible solo en el lab): <code>${escapeHtml(dbPassword)}</code></p>
     <hr>
     <p>Version: ${escapeHtml(settings.version)} &middot; Pod: ${escapeHtml(settings.hostname)}</p>
   </body>

@@ -6,7 +6,7 @@ let server;
 let baseUrl;
 
 before(async () => {
-  const app = createApp({ color: 'azul', forma: 'redonda', APP_VERSION: 'sha-test' });
+  const app = createApp({ color: 'azul', forma: 'redonda', DB_PASSWORD: 's3cr3t-test', APP_VERSION: 'sha-test' });
   await new Promise((resolve) => {
     server = app.listen(0, resolve);
   });
@@ -30,6 +30,7 @@ test('GET / muestra los valores del Secret y la version', async () => {
   assert.match(body, /Color: azul/);
   assert.match(body, /class="swatch"[^>]*background:blue;border-radius:50%/);
   assert.match(body, /Forma: redonda/);
+  assert.match(body, /DB_PASSWORD \(Sealed Secret, visible solo en el lab\): <code>s3cr3t-test<\/code>/);
   assert.match(body, /Version: sha-test/);
   assert.match(body, /Build Pipeline: GitHub Actions/);
 });
@@ -40,6 +41,20 @@ test('GET /api/info devuelve la configuracion en JSON', async () => {
   assert.equal(info.color, 'azul');
   assert.equal(info.forma, 'redonda');
   assert.equal(info.version, 'sha-test');
+  assert.ok(!JSON.stringify(info).includes('s3cr3t-test'), '/api/info no debe devolver DB_PASSWORD');
+});
+
+test('GET / sin DB_PASSWORD indica que no esta configurada', async () => {
+  const app = createApp({});
+  const local = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  try {
+    const body = await (await fetch(`http://127.0.0.1:${local.address().port}/`)).text();
+    assert.match(body, /<code>no configurada<\/code>/);
+  } finally {
+    local.close();
+  }
 });
 
 test('sin variables usa valores por defecto', async () => {
