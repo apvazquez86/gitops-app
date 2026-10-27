@@ -1,12 +1,14 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
-const { createApp, escapeHtml, cssColor, cssBorderRadius } = require('../src/app');
+const { createApp, escapeHtml, cssColor, cssBorderRadius, maskSecret } = require('../src/app');
+
+const API_KEY = 'sk-test-0123456789abcd';
 
 let server;
 let baseUrl;
 
 before(async () => {
-  const app = createApp({ color: 'azul', forma: 'redonda', APP_VERSION: 'sha-test' });
+  const app = createApp({ color: 'azul', forma: 'redonda', API_KEY, APP_VERSION: 'sha-test' });
   await new Promise((resolve) => {
     server = app.listen(0, resolve);
   });
@@ -30,8 +32,10 @@ test('GET / muestra los valores del Secret y la version', async () => {
   assert.match(body, /Color: azul/);
   assert.match(body, /class="swatch"[^>]*background:blue;border-radius:50%/);
   assert.match(body, /Forma: redonda/);
+  assert.match(body, /API key: ••••••abcd/);
   assert.match(body, /Version: sha-test/);
   assert.match(body, /Build Pipeline: GitHub Actions/);
+  assert.ok(!body.includes(API_KEY), 'la pagina no debe mostrar la API key completa');
 });
 
 test('GET /api/info devuelve la configuracion en JSON', async () => {
@@ -39,7 +43,10 @@ test('GET /api/info devuelve la configuracion en JSON', async () => {
   const info = await res.json();
   assert.equal(info.color, 'azul');
   assert.equal(info.forma, 'redonda');
+  assert.equal(info.apiKey, '••••••abcd');
+  assert.equal(info.apiKeyConfigured, true);
   assert.equal(info.version, 'sha-test');
+  assert.ok(!JSON.stringify(info).includes(API_KEY), '/api/info no debe exponer la API key');
 });
 
 test('sin variables usa valores por defecto', async () => {
@@ -51,6 +58,8 @@ test('sin variables usa valores por defecto', async () => {
     const res = await fetch(`http://127.0.0.1:${local.address().port}/api/info`);
     const info = await res.json();
     assert.equal(info.color, 'sin definir');
+    assert.equal(info.apiKey, 'no configurada');
+    assert.equal(info.apiKeyConfigured, false);
     assert.equal(info.version, 'dev');
   } finally {
     local.close();
@@ -66,6 +75,13 @@ test('cssColor traduce el nombre del color y usa gris si no lo conoce', () => {
 test('cssBorderRadius dibuja un circulo solo para la forma redonda', () => {
   assert.equal(cssBorderRadius('redonda'), '50%');
   assert.equal(cssBorderRadius('cuadrada'), '0');
+});
+
+test('maskSecret solo deja ver los ultimos 4 caracteres de claves largas', () => {
+  assert.equal(maskSecret(undefined), 'no configurada');
+  assert.equal(maskSecret(''), 'no configurada');
+  assert.equal(maskSecret('corta'), '••••••');
+  assert.equal(maskSecret('0123456789ab'), '••••••89ab');
 });
 
 test('escapeHtml neutraliza HTML en los valores', () => {
