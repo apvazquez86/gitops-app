@@ -10,7 +10,7 @@ Aplicación de ejemplo (Node.js + Express) del laboratorio GitOps. Este repo es 
 | `/api/info` | Lo mismo en JSON |
 | `/healthz` | Health check para las probes de Kubernetes |
 
-Variables de entorno: `color` y `forma` (vienen del ConfigMap `nginx-settings`, definido en `settings` de los values del chart), `API_KEY` (viene del Secret `nginx-secrets`, que el controller de Sealed Secrets genera a partir de un SealedSecret; la app solo muestra sus últimos 4 caracteres), `APP_VERSION` (la fija el build) y `PORT` (por defecto 8080).
+Variables de entorno: `color` y `forma` (vienen del ConfigMap `nginx-settings`, definido en `settings` de los values del chart), `APP_VERSION` (la fija el build) y `PORT` (por defecto 8080).
 
 ## Desarrollo local
 
