@@ -1,0 +1,26 @@
+# Updates are grouped and weekly: each merge publishes an image and opens a
+# deploy PR, so one PR per dependency would be a lot of noise.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      # Moving to another Node major is a deliberate change.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
